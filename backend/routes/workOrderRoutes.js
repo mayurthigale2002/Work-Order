@@ -1,3 +1,5 @@
+
+
 const multer = require("multer");
 const express = require("express");
 const router = express.Router();
@@ -157,12 +159,31 @@ router.get("/", async (req, res) => {
     let limit = parseInt(req.query.limit) || 10;
     let offset = (page - 1) * limit;
 
-    const [rows] = await db.query(
-      "SELECT * FROM work_orders ORDER BY id DESC LIMIT ? OFFSET ?",
-      [limit, offset],
-    );
+    const { user_email } = req.query;
 
-    const [count] = await db.query("SELECT COUNT(*) as total FROM work_orders");
+    let query = "SELECT * FROM work_orders";
+    let values = [];
+
+    // 👇 filter only user work orders
+    if (user_email) {
+      query += " WHERE user_email = ?";
+      values.push(user_email);
+    }
+
+    query += " ORDER BY id ASC LIMIT ? OFFSET ?";
+    values.push(limit, offset);
+
+    const [rows] = await db.query(query, values);
+
+    let countQuery = "SELECT COUNT(*) as total FROM work_orders";
+    let countValues = [];
+
+    if (user_email) {
+      countQuery += " WHERE user_email = ?";
+      countValues.push(user_email);
+    }
+
+    const [count] = await db.query(countQuery, countValues);
 
     res.json({
       data: rows,
@@ -387,6 +408,9 @@ router.get("/proposals", async (req, res) => {
   }
 });
 
+
+
+
 // ==========================
 // GET ALL PROPOSALS BY ID
 // ==========================
@@ -484,29 +508,29 @@ router.post("/create-bill", async (req, res) => {
     console.log("BILL BODY:", req.body);
 
     // validation
-    if (!proposal_id || !bill_no) {
+    if (!bill_no || !bill_amount) {
       return res.status(400).json({
-        message: "Proposal ID and Bill No required",
+        message: "Bill No and Amount required",
       });
     }
 
     const [result] = await db.query(
       `INSERT INTO bill (
-        proposal_id,
-        work_order_id,
-        bill_no,
-        bill_amount,
-        bill_description,
-        created_by,
-        status,
-        bill_date,
-        bill_type,
-        gst_amount,
-        net_amount,
-        remarks
-      ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`,
+    proposal_id,
+    work_order_id,
+    bill_no,
+    bill_amount,
+    bill_description,
+    created_by,
+    status,
+    bill_date,
+    bill_type,
+    gst_amount,
+    net_amount,
+    remarks
+  ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`,
       [
-        proposal_id,
+        proposal_id || null,
         work_order_id || null,
         bill_no,
         bill_amount,
@@ -541,15 +565,14 @@ router.post("/create-bill", async (req, res) => {
 
 
 
-
-
-
-// ======================================================
-// View BILL
-// ======================================================
+// ==========================
+// GET ALL BILLS
+// ==========================
 router.get("/bills", async (req, res) => {
   try {
-    const [rows] = await db.query("SELECT * FROM bill ORDER BY id DESC");
+    const [rows] = await db.query(`
+      SELECT * FROM bill ORDER BY id DESC
+    `);
 
     res.json({
       data: rows,
@@ -559,5 +582,31 @@ router.get("/bills", async (req, res) => {
     res.status(500).json({ message: "Server Error" });
   }
 });
+
+
+
+
+router.get("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const [rows] = await db.query(
+      "SELECT * FROM work_orders WHERE id = ?",
+      [id]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: "Not found" });
+    }
+
+    res.json(rows[0]);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Server Error" });
+  }
+});
+
+
+
 
 module.exports = router;

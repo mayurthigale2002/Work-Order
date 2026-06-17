@@ -21,22 +21,6 @@ function App() {
   return (
     <BrowserRouter>
 
-      {/* NAVBAR + NOTIFICATIONS */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          padding: "10px 20px",
-          borderBottom: "1px solid #ccc"
-        }}
-      >
-        <h3>Work Order System</h3>
-
-        {/* 🔔 Notification Bell */}
-        <Notifications />
-      </div>
-
       <Navbar />
 
       <Routes>
@@ -55,6 +39,7 @@ function App() {
         <Route path="/create-bill/:id" element={<CreateBill />} />
         <Route path="/create-bill" element={<CreateBill />} />
         <Route path="/bills" element={<ViewBills />} />
+        <Route path="/bill/:id" element={<ViewBills />} />
       </Routes>
 
     </BrowserRouter>

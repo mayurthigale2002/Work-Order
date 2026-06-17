@@ -26,7 +26,7 @@ function ViewProposals() {
       <h3>📄 All Proposals</h3>
 
       <table className="table table-bordered mt-3">
-        <thead>
+        <thead className="table-dark">
           <tr>
             <th>ID</th>
             <th>Work Order</th>
@@ -43,7 +43,6 @@ function ViewProposals() {
               <td>{p.work_order_number}</td>
               <td>{p.created_by}</td>
               <td>{p.proposal_no}</td>
-
               <td>
                 <button
                   className="btn btn-primary btn-sm"

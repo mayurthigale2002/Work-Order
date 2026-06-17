@@ -11,7 +11,7 @@ function Navbar() {
   };
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm px-3">
+    <nav className="navbar navbar-expand-lg bg-secondary shadow-sm px-3">
       <div className="container-fluid d-flex justify-content-between">
 
         {/* LEFT SIDE MENU */}
@@ -108,7 +108,11 @@ function Navbar() {
 
           {user ? (
             <>
-              <span className="text-white me-3 fw-semibold">
+              <span
+                className="text-white me-3 fw-semibold"
+                style={{ cursor: "pointer" }}
+                onClick={() => navigate("/dashboard")}
+              >
                 👤 {user.name}
               </span>
 
